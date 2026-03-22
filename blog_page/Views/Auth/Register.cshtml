@@ -1,5 +1,48 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model blog_page.Models.ViewModels.RegisterViewModel;
 @{
+    ViewData["Title"] = "Kayıt Ol";
 }
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="card shadow-lg border-0 rounded-4" style="width: 400px;">
+        <div class="card-body p-5">
+            <h2 class="text-center fw-bold mb-4 text-primary">Kayıt Ol</h2>
+            
+            <form asp-controller="Auth" asp-action="Register" method="post">
+                @* Güvenlik için token *@
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Kullanıcı Adı</label>
+                    <input asp-for="Username" class="form-control rounded-3" placeholder="mertkaan" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">E-posta</label>
+                    <input asp-for="Email" type="email" class="form-control rounded-3" placeholder="ornek@mail.com" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Parola</label>
+                    <input asp-for="Password" type="password" class="form-control rounded-3" placeholder="******" required />
+                </div>
+
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="terms" required>
+                    <label class="form-check-label small" for="terms">
+                        Gizlilik sözleşmesini okudum ve onaylıyorum.
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 fw-bold py-2 rounded-3 shadow-sm">
+                    Kayıt İşlemini Tamamla
+                </button>
+
+                <div class="text-center mt-4">
+                    <span class="small text-muted">Zaten hesabın var mı?</span>
+                    <a asp-action="Login" class="small text-decoration-none fw-bold"> Giriş Yap</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

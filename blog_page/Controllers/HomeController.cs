@@ -18,5 +18,28 @@ namespace blog_page.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+
+        List<Models.User> vars = new List<Models.User>();
+
+        public IActionResult listUser() {
+
+        for(int i = 0; i < 10; i++)
+            {
+                var veri = new Models.User()
+                {
+                    Id = 1,
+                    Email = "cukadar.mertkaan@gmail.com",
+                    CreatedAt = DateTime.Now,
+                    Username = "mertkaan",
+                };
+
+                vars.Add(veri);
+            }
+           
+
+
+            return View("Kullanicilar" , vars);
+        }
     }
 }

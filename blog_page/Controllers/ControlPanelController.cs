@@ -2,7 +2,7 @@
 
 namespace blog_page.Controllers
 {
-    public class  ControlPanelControllers : Controller
+    public class  ControlPanelController: Controller
     {
         public IActionResult AdminDashboard()
         {

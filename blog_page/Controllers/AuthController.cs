@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Client;
 using blog_page.Models;
-using Microsoft.EntityFrameworkCore;
 using blog_page.Models.ViewModels;
 using blog_page.Services;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace blog_page.Controllers
@@ -44,8 +46,6 @@ namespace blog_page.Controllers
                 _blogPageContext.Users.Add(newUser);
                 await _blogPageContext.SaveChangesAsync();
 
-                // 3. İsteğe bağlı: Kayıt olunca otomatik default bir rol ata (örn: 'User' rolü)
-                // Bu kısım senin Roles tablondaki ID'ye göre değişir.
                 var defaultRole = new UserRole
                 { 
                     UserFkid = newUser.Id,
@@ -60,23 +60,78 @@ namespace blog_page.Controllers
             }
             return View(model);
         }
-        
-        
-        
+
+
+        [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
 
-      
+        [HttpPost]
+        public async Task<IActionResult> Login(LoginViewModel model) {
+            if (ModelState.IsValid) {
 
-        public RedirectResult RedirectLogin() {
+                var user = await _blogPageContext.Users
+                    .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.RoleFk)
+                    .FirstOrDefaultAsync(u => u.Email == model.Email);
 
-            return Redirect("/Auth/login");
-        }
-        public IActionResult RedirectLoginAction() {
-            String[] names = { "mert", "deneme", "gizem" };
-            return View("Login" , names);
+                if (user == null || user.IsBanned) {
+                    ModelState.AddModelError("", "Kullanıcı bulunamadı ya da Banlı");
+                    return View(model);
                 }
+
+                if (string.IsNullOrEmpty(user.PasswordHash) || string.IsNullOrEmpty(user.PasswordSalt))
+                {
+                    ModelState.AddModelError("", "Kullanıcı için parola verisi eksik.");
+                    return View(model);
+                }
+
+                byte[] storedHash = Convert.FromBase64String(user.PasswordHash);
+                byte[] storedSalt = Convert.FromBase64String(user.PasswordSalt);
+
+                if (!PasswordHasher.VerifyPasswordHash(model.Password, storedHash, storedSalt))
+                {
+                    ModelState.AddModelError("", "Hatalı şifre!");
+                    return View(model);
+                }
+
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new Claim(ClaimTypes.Name, user.Username),
+                    new Claim(ClaimTypes.Email, user.Email)
+                };
+
+                foreach (var userRole in user.UserRoles)
+                {
+                    var roleName = userRole.RoleFk?.Name;
+                    if (!string.IsNullOrEmpty(roleName))
+                    {
+                        claims.Add(new Claim(ClaimTypes.Role, roleName));
+                    }
+                }
+
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity));
+
+                return RedirectToAction("Index", "Home");
+
+
+            }
+            return View(model);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> Logout() {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Login", "Auth");
+        }
+      
     }
 }

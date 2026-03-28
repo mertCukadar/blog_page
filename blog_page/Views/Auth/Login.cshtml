@@ -1,12 +1,31 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model blog_page.Models.ViewModels.LoginViewModel
 @{
+   ViewData["Title"] = "Login";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Giriş yap</h1>
-    <p>giriş adınız</p>
-    <p>parolaniz</p>
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="card shadow-lg border-0 rounded-4" style="width: 400px;">
+        <div class="card-body p-5">
+            <h2 class="text-primary fw-bold mb-4 text-center">Giriş Yap</h2>
 
+            <form class="" asp-controller="Auth" asp-action="Login" method="post">
+                @Html.AntiForgeryToken()
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input asp-for="Email" class="form-control" placeholder="deneme@gmail.com" />
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Password</label>
+                    <input asp-for="Password" class="form-control" type="password" placeholder="******" />
+                </div>
+                <button type="submit" class="btn btn-primary w-100 fw-bold py-2 rounded-3 shadow-sm">Giriş Yap</button>
+
+            </form>
+            <div class="text-center mt-4">
+                <span class="small text-muted">Hesabınız yok mu?</span>
+                <a asp-action="Register" class="small text-decoration-none fw-bold"> Kayıt Ol</a>
+            </div>
+        </div>
+    </div>
+    
 </div>

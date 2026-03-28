@@ -12,6 +12,17 @@ builder.Services.AddDbContext<BlogPageContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Auth/Login";
+        options.LogoutPath = "/Auth/Logout";
+        options.ExpireTimeSpan = TimeSpan.FromHours(1);
+        options.Cookie.Name = "MyApp.Auth";
+        // configure other options as needed
+    });
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 

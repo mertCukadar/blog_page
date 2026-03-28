@@ -1,0 +1,52 @@
+﻿@model blog_page.Models.User
+@{
+    ViewData["Title"] = "Profilim";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow border-0 text-center p-4">
+                <div class="mb-3">
+                    <img src="https://ui-avatars.com/api/?name=@Model.Username&background=random" class="rounded-circle" width="100" />
+                </div>
+                <h4>@Model.Username</h4>
+                <p class="text-muted">@Model.Email</p>
+                <hr />
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary btn-sm">Profili Düzenle</button>
+                    <button class="btn btn-outline-danger btn-sm">Şifre Değiştir</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card shadow border-0 p-4">
+                <h5>Hesap Detayları</h5>
+                <table class="table mt-3">
+                    <tr>
+                        <td><strong>Katılım Tarihi:</strong></td>
+                        <td>@Model.CreatedAt.ToShortDateString()</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Roller:</strong></td>
+                        <td>
+                            @foreach (var ur in Model.UserRoles)
+                            {
+                                <span class="badge bg-success">@ur.RoleFk.Name</span>
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Hesap Durumu:</strong></td>
+                        <td>
+                            <span class="badge @(Model.IsBanned ? "bg-danger" : "bg-primary")">
+                                @(Model.IsBanned ? "Banlı" : "Aktif")
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,55 @@
+﻿@{
+    ViewData["Title"] = "Yeni Kategori";
+    Layout = "_AdminLayout";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-primary py-3 border-0">
+                    <h5 class="card-title text-white mb-0 fw-bold text-center">
+                        <i class="bi bi-folder-plus me-2"></i>Yeni Kategori Tanımla
+                    </h5>
+                </div>
+                <div class="card-body p-4 bg-white">
+                    
+                    @* Controller'daki "categoryName" parametresiyle eşleşmesi için name="categoryNamecategoryName" kullandık *@
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-4 text-center">
+                            <p class="text-muted small">
+                                Blog yazılarını gruplandırmak için bir kategori ismi girin.
+                                <br><strong>Slug</strong> sistem tarafından otomatik oluşturulur.
+                            </p>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="text" name="categoryName" class="form-control border-light shadow-sm"
+                                   id="catInput" placeholder="Kategori Adı" required autofocus>
+                            <label for="catInput" class="text-muted">Kategori Adı (Örn: C# Programlama)</label>
+                        </div>
+
+                        @if (TempData["Error"] != null)
+                        {
+                            <div class="alert alert-danger small py-2 border-0 shadow-sm mb-3">
+                                <i class="bi bi-exclamation-triangle me-2"></i>@TempData["Error"]
+                            </div>
+                        }
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-3 shadow fw-bold">
+                                <i class="bi bi-save me-2"></i>Kategoriyi Kaydet
+                            </button>
+                            <a asp-action="Index" class="btn btn-link text-decoration-none text-muted small">
+                                <i class="bi bi-arrow-left me-1"></i>Listeye Geri Dön
+                            </a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,74 @@
+﻿@model IEnumerable<blog_page.Models.BlogCategory>
+@{
+    ViewData["Title"] = "Kategori Yönetimi";
+}
+
+<div class="container-fluid mt-4">
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold text-dark mb-0">Kategori Yönetimi</h3>
+                <p class="text-muted small">Blog yazılarını sınıflandırmak için kategorileri buradan yönetebilirsiniz.</p>
+            </div>
+            <a asp-controller="Category" asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                <i class="bi bi-plus-lg me-2"></i>Yeni Kategori Ekle
+            </a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle border-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3 border-0 rounded-start text-muted small">ID</th>
+                        <th class="border-0 text-muted small">KATEGORİ ADI</th>
+                        <th class="border-0 text-muted small">SLUG (URL)</th>
+                        <th class="border-0 text-muted small">OLUŞTURULMA</th>
+                        <th class="text-end pe-3 border-0 rounded-end text-muted small">İŞLEMLER</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-3 fw-bold text-primary">#@item.CategoryId</td>
+                                <td>
+                                    <span class="fw-semibold text-dark">@item.Name</span>
+                                </td>
+                                <td>
+                                    <code class="bg-light px-2 py-1 rounded small">/@item.Slug</code>
+                                </td>
+                                <td>
+                                    <span class="text-muted small">@item.CreatedAt.ToShortDateString()</span>
+                                </td>
+                                <td class="text-end pe-3">
+                                    <div class="btn-group shadow-sm rounded">
+                                        <a href="/Category/Edit/@item.CategoryId" class="btn btn-sm btn-white border px-3" title="Düzenle">
+                                            <i class="bi bi-pencil-square text-warning"></i>
+                                        </a>
+                                        <a href="/Category/Delete/@item.CategoryId" class="btn btn-sm btn-white border px-3" title="Sil" onclick="return confirm('Bu kategoriyi silmek istediğine emin misin?')">
+                                            <i class="bi bi-trash3 text-danger"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="bi bi-folder2-open fs-1 d-block mb-3 opacity-25"></i>
+                                    Henüz hiç kategori eklenmemiş.
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

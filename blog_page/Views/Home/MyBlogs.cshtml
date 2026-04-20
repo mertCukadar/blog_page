@@ -1,0 +1,105 @@
+﻿@model IEnumerable<blog_page.Models.BlogPost>
+
+<style>
+    .my-blog-row { transition: all 0.2s; border: 1px solid #eee !important; border-radius: 16px; margin-bottom: 12px; }
+    .my-blog-row:hover { border-color: #000 !important; background-color: #fff !important; box-shadow: 0 8px 20px rgba(0,0,0,0.04); }
+    .blog-thumb { width: 80px; height: 60px; object-fit: cover; border-radius: 8px; }
+    .action-btn-group .btn { width: 35px; height: 35px; display: inline-flex; align-items: center; justify-content: center; }
+</style>
+
+<div class="container py-5">
+    
+    <div class="row align-items-center mb-5">
+        <div class="col-md-8">
+            <h2 class="fw-bold m-0" style="letter-spacing: -1px;">Dökümanlarım</h2>
+            <p class="text-muted small mb-0">Yazdığın tüm içerikleri buradan yönetebilirsin.</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <a asp-controller="CreateBlog" asp-action="Index" class="btn btn-dark rounded-pill px-4 fw-bold shadow-sm">
+                <i class="bi bi-plus-lg me-2"></i> Yeni Yazı
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            @if (Model.Any())
+            {
+                @foreach (var item in Model)
+                {
+                    <div class="card my-blog-row bg-white border-0 p-3 shadow-none">
+                        <div class="row align-items-center">
+                            
+                            <div class="col-auto">
+                                <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? "/images/default-blog.jpg" : item.ImageUrl)" class="blog-thumb border">
+                            </div>
+                            
+                            <div class="col">
+                                <h6 class="fw-bold m-0 text-dark line-clamp-1 mb-1">@item.Title</h6>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-light text-dark border" style="font-size: 10px;">@item.CategoryFk?.Name</span>
+                                    <small class="text-muted" style="font-size: 11px;"><i class="bi bi-calendar3 me-1"></i>@item.CreatedAt.ToString("dd MMM yyyy")</small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-2 d-none d-md-block text-center border-start border-end">
+                                <small class="text-muted d-block" style="font-size: 10px;">OKUNMA</small>
+                                <span class="small fw-bold">
+                                    <i class="bi bi-eye text-muted me-1"></i> @item.ViewCount
+                                </span>
+                            </div>
+                            
+                            <div class="col-md-2 d-none d-md-block text-center">
+                                @if (item.Status)
+                                {
+                                    <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2" style="font-size: 11px;">
+                                        <i class="bi bi-check-circle me-1"></i> Yayınlandı
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning-subtle text-warning rounded-pill px-3 py-2" style="font-size: 11px;">
+                                        <i class="bi bi-hourglass-split me-1"></i> Onay Bekliyor
+                                    </span>
+                                }
+                            </div>
+                            
+                            <div class="col-auto text-end">
+                                <div class="action-btn-group gap-1 d-flex">
+                                    @* Yazıyı İncele *@
+                                    <a href="/Details/@item.Slug" class="btn btn-light border text-dark rounded-circle" title="Görüntüle">
+                                        <i class="bi bi-box-arrow-up-right"></i>
+                                    </a>
+                                    
+                                    @* Düzenle *@
+                                    <a asp-action="EditBlog" asp-controller="CreateBlog" asp-route-id="@item.PostId" class="btn btn-light border text-primary rounded-circle" title="Düzenle">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    
+                                    @* Sil *@
+                                    <form asp-action="DeleteBlog" asp-route-id="@item.PostId" method="post" class="d-inline" onsubmit="return confirm('Bu dökümanı silmek istediğine emin misin?');">
+                                        <button type="submit" class="btn btn-light border text-danger rounded-circle" title="Sil">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5 bg-white rounded-4 border shadow-sm mt-3">
+                    <i class="bi bi-journal-x display-4 text-muted opacity-25"></i>
+                    <h5 class="fw-bold mt-3">Henüz Bir İçerik Yok</h5>
+                    <p class="text-muted small">Mühendislik tecrübelerini paylaşmaya başlamak için yeni bir yazı oluştur.</p>
+                    <a asp-controller="CreateBlog" asp-action="CreateBlog" class="btn btn-dark rounded-pill px-4 mt-2">
+                        İlk Dökümanını Yaz
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

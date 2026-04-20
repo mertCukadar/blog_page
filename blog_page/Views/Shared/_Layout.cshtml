@@ -68,7 +68,7 @@
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
                                     <li><a class="dropdown-item" asp-controller="User" asp-action="Index"><i class="bi bi-person me-2 text-muted"></i>Hesabım</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="bi bi-journal-text me-2 text-muted"></i>Bloglarım</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Home" asp-action="MyBlogs""><i class="bi bi-journal-text me-2 text-muted"></i>Bloglarım</a></li>
                                     
                                     @if (User.IsInRole("Admin") || User.IsInRole("Moderator"))
                                     {

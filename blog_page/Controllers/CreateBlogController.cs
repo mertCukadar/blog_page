@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Security.Cryptography;
 
 [Authorize(Roles = "Admin, Mod, Member")]
 public class CreateBlogController : Controller
@@ -17,7 +18,6 @@ public class CreateBlogController : Controller
         _blogPageContext = blogpageContext;
     }
 
-    // Kategorileri liste olarak hazırlayan yardımcı metod
     private List<SelectListItem> GetCategories()
     {
         return _blogPageContext.BlogCategories
@@ -32,7 +32,6 @@ public class CreateBlogController : Controller
     [Authorize(Roles = "Admin, Mod, Member")]
     public IActionResult Index()
     {
-        // View'a modeli boş ama kategori listesi dolu gönderiyoruz
         var model = new BlogCreateViewModel
         {
             CategoryList = GetCategories()
@@ -45,17 +44,14 @@ public class CreateBlogController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CreateBlog(BlogCreateViewModel model)
     {
-        // Resim seçilmediği için ModelState hata veriyorsa onu temizleyelim
         ModelState.Remove("ImageFile");
 
         if (!ModelState.IsValid)
         {
             model.CategoryList = GetCategories();
-            // RedirectToAction yerine View döndürürken isme dikkat
             return View("Index", model);
         }
 
-        // 1. Önce Slug kontrolü yapalım (Resmi boşuna yüklemeyelim)
         string genereated_slug = SlugHalpers.toUrlSlug(model.Title);
         bool isSlugTaken = await _blogPageContext.BlogPosts.AnyAsync(p => p.Slug == genereated_slug);
 
@@ -66,7 +62,6 @@ public class CreateBlogController : Controller
             return View("Index", model);
         }
 
-        // 2. Resim İşlemi
         string uploadedImageUrl = "/images/default-blog.jpg";
         if (model.ImageFile != null && model.ImageFile.Length > 0)
         {
@@ -74,7 +69,6 @@ public class CreateBlogController : Controller
             uploadedImageUrl = await cloudinary.UploadImageAsync(model.ImageFile);
         }
 
-        // 3. Kayıt İşlemi
         var newPost = new BlogPost
         {
             AuthorFkuserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)),
@@ -94,5 +88,62 @@ public class CreateBlogController : Controller
         // Kayıttan sonra Home/Index'e git
         return RedirectToAction("Index", "Home");
     }
-    
+
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> EditBlog(int id)
+    {
+        var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+        var blog = await _blogPageContext.BlogPosts
+            .FirstOrDefaultAsync(b => b.PostId == id && b.AuthorFkuserId == currentUserId);
+
+        if (blog == null)
+        {
+            return NotFound();
+        }
+
+        EditBlogViewModel viewBlog = new EditBlogViewModel
+        {
+            PostId = blog.PostId,                
+            Title = blog.Title,
+            BlogContent = blog.BlogContent,
+            ImageUrl = blog.ImageUrl,
+            CategorieID = blog.CategoryFkid.GetValueOrDefault()      
+        };
+
+        viewBlog.CategoryList = GetCategories();
+
+        return View(viewBlog);
+    }
+
+    [HttpPost]
+    [Authorize]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditBlog(int id, EditBlogViewModel model)
+    {
+        var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+        var existingBlog = await _blogPageContext.BlogPosts
+            .FirstOrDefaultAsync(b => b.PostId == id && b.AuthorFkuserId == currentUserId);
+
+        if (existingBlog == null) return NotFound();
+
+        existingBlog.Title = model.Title;
+        existingBlog.BlogContent = model.BlogContent;
+        existingBlog.CategoryFkid = model.CategorieID;
+        existingBlog.Status = false;
+
+        if (model.ImageFile != null && model.ImageFile.Length > 0)
+        {
+            var cloudinary = new CloudinaryService();
+            existingBlog.ImageUrl = await cloudinary.UploadImageAsync(model.ImageFile);
+        }
+
+        _blogPageContext.Update(existingBlog);
+        await _blogPageContext.SaveChangesAsync();
+
+        return RedirectToAction("MyBlogs" , "Home");
+    }
+
 }

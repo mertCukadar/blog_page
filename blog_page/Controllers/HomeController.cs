@@ -1,6 +1,8 @@
 using blog_page.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using System.Diagnostics;
 using System.Security.Claims;
 
@@ -19,20 +21,17 @@ namespace blog_page.Controllers
 
         public async Task<IActionResult> Index(string slug)
         {
-            // 1. Sorguyu hazırlıyoruz (Henüz veritabanına gitmedi)
             var blogQuery = _context.BlogPosts
                 .Include(b => b.AuthorFkuser)
                 .Include(b => b.CategoryFk)
                 .Where(b => b.Status == true)
                 .AsQueryable();
 
-            // 2. Eğer URL'den bir slug gelmişse (Kategoriye tıklandıysa) filtreyi ekle
             if (!string.IsNullOrEmpty(slug))
             {
                 blogQuery = blogQuery.Where(b => b.CategoryFk.Slug == slug);
             }
 
-            // 3. Veriyi tek seferde ve doğru şekilde çekiyoruz
             var blogs = await blogQuery
                 .OrderByDescending(b => b.PublishedAt)
                 .ToListAsync();
@@ -46,7 +45,6 @@ namespace blog_page.Controllers
         {
             if (string.IsNullOrEmpty(slug)) return NotFound();
 
-            // 1. Önce yazıyı status bağımsız çekelim
             var post = await _context.BlogPosts
                 .Include(b => b.AuthorFkuser)
                 .Include(b => b.CategoryFk)
@@ -54,10 +52,8 @@ namespace blog_page.Controllers
 
             if (post == null) return NotFound();
 
-            // 2. Kritik Kontrol: Eğer yazı yayında değilse (false)
             if (post.Status == false)
             {
-                // Kullanıcı giriş yapmış mı ve Admin/Mod/Yazar mı?
                 bool canView = User.Identity.IsAuthenticated &&
                                (User.IsInRole("Admin") ||
                                 User.IsInRole("Mod") ||
@@ -65,12 +61,10 @@ namespace blog_page.Controllers
 
                 if (!canView)
                 {
-                    // Yetkisi yoksa 404 ver (yazı yokmuş gibi davranmak güvenlidir)
                     return NotFound();
                 }
             }
 
-            // İzlenme sayısını artıralım (Admin saymasın istiyorsan buraya da check koyabilirsin)
             if (post.Status == true)
             {
                 post.ViewCount += 1;
@@ -78,6 +72,22 @@ namespace blog_page.Controllers
             }
 
             return View(post);
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> MyBlogs()
+        {
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var userBlogs = await _context.BlogPosts
+                .Include(b => b.AuthorFkuser)
+                .Include(b => b.CategoryFk)
+                .Where(b => b.AuthorFkuserId == int.Parse(currentUserId))
+                .OrderByDescending(b => b.CreatedAt)
+                .ToListAsync();
+
+            return View(userBlogs);
         }
     }
 }

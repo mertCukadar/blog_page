@@ -1,0 +1,132 @@
+﻿@model blog_page.Models.BlogPost
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<style>
+    /* Teknik Döküman Tipografisi */
+    .blog-content { 
+        color: #2d3436; 
+        line-height: 1.8; 
+        font-size: 1.1rem;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+    .blog-content h2, .blog-content h3 { 
+        font-weight: 800; 
+        margin-top: 2.5rem; 
+        margin-bottom: 1.2rem; 
+        color: #000;
+        letter-spacing: -0.5px;
+    }
+    
+    /* Prism.js Kod Bloğu Modernizasyonu */
+    pre[class*="language-"] {
+        border-radius: 12px !important;
+        margin: 2rem 0 !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 1.5rem !important;
+        position: relative;
+        background: #1e1e1e !important;
+    }
+    
+    /* Kod Bloklarına Pencere Efekti (Mac Style) */
+    pre[class*="language-"]::before {
+        content: "";
+        position: absolute;
+        top: 10px;
+        left: 15px;
+        width: 10px;
+        height: 10px;
+        background: #ff5f56;
+        border-radius: 50%;
+        box-shadow: 18px 0 0 #ffbd2e, 36px 0 0 #27c93f;
+        z-index: 10;
+    }
+
+    .meta-badge { background: #fff; border: 1px solid #eee; border-radius: 50px; padding: 6px 16px; font-size: 0.85rem; font-weight: 600; }
+    .breadcrumb-item a { text-decoration: none; color: #adb5bd; font-weight: 500; }
+    .breadcrumb-item.active { color: #000; font-weight: 700; }
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-9">
+            
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb bg-transparent p-0">
+                    <li class="breadcrumb-item"><a href="/">Dökümanlar</a></li>
+                    <li class="breadcrumb-item active">@Model.CategoryFk?.Name</li>
+                </ol>
+            </nav>
+
+            <h1 class="display-4 fw-extrabold mb-4 text-dark" style="letter-spacing: -2px;">@Model.Title</h1>
+            
+            <div class="d-flex flex-wrap gap-2 mb-5">
+                <div class="meta-badge shadow-sm">
+                    <img src="https://ui-avatars.com/api/?name=@Model.AuthorFkuser?.Username&background=000&color=fff" class="rounded-circle me-2" width="20">
+                    @Model.AuthorFkuser?.Username
+                </div>
+                <div class="meta-badge shadow-sm text-muted">
+                    <i class="bi bi-calendar3 me-2"></i>@Model.CreatedAt.ToString("dd MMMM yyyy")
+                </div>
+                <div class="meta-badge shadow-sm text-muted">
+                    <i class="bi bi-eye me-2"></i>@Model.ViewCount okuma
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <div class="position-relative mb-5">
+                    <img src="@Model.ImageUrl" class="img-fluid rounded-5 shadow-lg w-100" 
+                         style="max-height: 550px; object-fit: cover;" alt="@Model.Title">
+                </div>
+            }
+
+            <div class="blog-content bg-white p-4 p-md-5 rounded-5 shadow-sm border border-light">
+                @Html.Raw(Model.BlogContent)
+            </div>
+
+            <div class="mt-5 d-flex justify-content-between align-items-center bg-white p-4 rounded-4 shadow-sm border border-light">
+                <div class="text-muted small fw-bold text-uppercase" style="letter-spacing: 1px;">
+                    Dökümantasyon Sonu
+                </div>
+                <a href="/" class="btn btn-dark rounded-pill px-4 fw-bold">
+                    <i class="bi bi-arrow-left me-2"></i>Geri Dön
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll('pre').forEach((preBlock) => {
+                if (!preBlock.querySelector('code')) {
+                    const codeContent = preBlock.innerHTML;
+                    const codeElement = document.createElement('code');
+                    
+                    // İçeriğe göre dil tahmini (Basit bir mantık)
+                    if(codeContent.includes("using") || codeContent.includes("namespace")) {
+                        codeElement.className = 'language-csharp';
+                    } else if(codeContent.includes("#include") || codeContent.includes("void setup()")) {
+                        codeElement.className = 'language-cpp';
+                    } else {
+                        codeElement.className = 'language-csharp';
+                    }
+                    
+                    codeElement.innerHTML = codeContent;
+                    preBlock.innerHTML = '';
+                    preBlock.appendChild(codeElement);
+                }
+            });
+            Prism.highlightAll();
+        });
+    </script>
+}

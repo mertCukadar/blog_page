@@ -3,49 +3,96 @@
     ViewData["Title"] = "Profilim";
 }
 
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card shadow border-0 text-center p-4">
-                <div class="mb-3">
-                    <img src="https://ui-avatars.com/api/?name=@Model.Username&background=random" class="rounded-circle" width="100" />
+<style>
+    .profile-card { border-radius: 20px; background: #fff; }
+    .info-label { font-size: 11px; font-weight: 700; color: #adb5bd; text-transform: uppercase; letter-spacing: 0.5px; }
+    .info-value { font-weight: 600; color: #333; }
+    .role-badge { background-color: #f8f9fa; color: #333; border: 1px solid #eee; border-radius: 8px; padding: 5px 12px; font-size: 0.8rem; }
+    .action-btn { border-radius: 12px; font-weight: 600; font-size: 0.85rem; padding: 10px; transition: all 0.2s; }
+    .action-btn:hover { transform: translateY(-2px); }
+</style>
+
+<div class="container">
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card profile-card border-0 shadow-sm p-4">
+                <div class="text-center">
+                    <div class="position-relative d-inline-block mb-3">
+                        <img src="https://ui-avatars.com/api/?name=@Model.Username&background=000&color=fff&size=128" 
+                             class="rounded-circle shadow-sm border border-4 border-white" width="110" />
+                        <span class="position-absolute bottom-0 end-0 bg-success border border-2 border-white rounded-circle" 
+                              style="width: 15px; height: 15px;" title="Aktif"></span>
+                    </div>
+                    <h4 class="fw-bold mb-1">@Model.Username</h4>
+                    <p class="text-muted small mb-4">@Model.Email</p>
+                    
+                    <div class="d-flex justify-content-center gap-2 mb-4">
+                        @foreach (var ur in Model.UserRoles)
+                        {
+                            <span class="role-badge">
+                                <i class="bi bi-shield-check me-1"></i> @ur.RoleFk.Name
+                            </span>
+                        }
+                    </div>
                 </div>
-                <h4>@Model.Username</h4>
-                <p class="text-muted">@Model.Email</p>
-                <hr />
+
                 <div class="d-grid gap-2">
-                    <button class="btn btn-outline-primary btn-sm">Profili Düzenle</button>
-                    <button class="btn btn-outline-danger btn-sm">Şifre Değiştir</button>
+                    <button class="btn btn-dark action-btn">
+                        <i class="bi bi-pencil-square me-2"></i>Profili Düzenle
+                    </button>
+                    <button class="btn btn-outline-secondary action-btn border-dashed">
+                        <i class="bi bi-key me-2"></i>Şifre Değiştir
+                    </button>
                 </div>
             </div>
         </div>
         
-        <div class="col-md-8">
-            <div class="card shadow border-0 p-4">
-                <h5>Hesap Detayları</h5>
-                <table class="table mt-3">
-                    <tr>
-                        <td><strong>Katılım Tarihi:</strong></td>
-                        <td>@Model.CreatedAt.ToShortDateString()</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Roller:</strong></td>
-                        <td>
-                            @foreach (var ur in Model.UserRoles)
-                            {
-                                <span class="badge bg-success">@ur.RoleFk.Name</span>
-                            }
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>Hesap Durumu:</strong></td>
-                        <td>
-                            <span class="badge @(Model.IsBanned ? "bg-danger" : "bg-primary")">
-                                @(Model.IsBanned ? "Banlı" : "Aktif")
+        <div class="col-lg-8">
+            <div class="card profile-card border-0 shadow-sm p-4 h-100">
+                <h5 class="fw-bold mb-4">Hesap Bilgileri</h5>
+                
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-4 bg-light">
+                            <label class="info-label d-block mb-1">Katılım Tarihi</label>
+                            <span class="info-value">@Model.CreatedAt.ToString("dd MMMM yyyy")</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-4 bg-light">
+                            <label class="info-label d-block mb-1">Hesap Durumu</label>
+                            <span class="info-value">
+                                @if (Model.IsBanned) {
+                                    <span class="text-danger"><i class="bi bi-x-circle-fill me-1"></i> Kısıtlanmış</span>
+                                } else {
+                                    <span class="text-success"><i class="bi bi-check-circle-fill me-1"></i> Aktif Kullanıcı</span>
+                                }
                             </span>
-                        </td>
-                    </tr>
-                </table>
+                        </div>
+                    </div>
+                </div>
+
+                <h5 class="fw-bold mt-5 mb-3">Hızlı İstatistikler</h5>
+                <div class="row g-3">
+                    <div class="col-6 col-md-3 text-center">
+                        <div class="border rounded-4 p-3">
+                            <h3 class="fw-bold mb-0">12</h3>
+                            <small class="text-muted">Blog</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 text-center">
+                        <div class="border rounded-4 p-3">
+                            <h3 class="fw-bold mb-0">450</h3>
+                            <small class="text-muted">Okunma</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-auto pt-4">
+                    <div class="alert alert-light border-0 rounded-4 mb-0 small text-muted">
+                        <i class="bi bi-info-circle me-2"></i> Hesabınla ilgili güvenlik ayarlarını "Şifre Değiştir" kısmından yönetebilirsin.
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -9,7 +9,7 @@ public partial class BlogPost
 
     public int AuthorFkuserId { get; set; }
 
-    public int CategoryFkid { get; set; }
+    public int? CategoryFkid { get; set; }
 
     public string Title { get; set; } = null!;
 
@@ -21,9 +21,11 @@ public partial class BlogPost
 
     public DateTime CreatedAt { get; set; }
 
-    public DateTime PublishedAt { get; set; }
+    public DateTime? PublishedAt { get; set; }
 
     public int ViewCount { get; set; }
+
+    public string? ImageUrl { get; set; }
 
     public virtual User AuthorFkuser { get; set; } = null!;
 
@@ -31,5 +33,5 @@ public partial class BlogPost
 
     public virtual ICollection<BlogLike> BlogLikes { get; set; } = new List<BlogLike>();
 
-    public virtual BlogCategory CategoryFk { get; set; } = null!;
+    public virtual BlogCategory? CategoryFk { get; set; }
 }

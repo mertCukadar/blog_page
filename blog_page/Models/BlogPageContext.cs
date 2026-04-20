@@ -103,6 +103,9 @@ public partial class BlogPageContext : DbContext
             entity.Property(e => e.AuthorFkuserId).HasColumnName("AuthorFKUserID");
             entity.Property(e => e.BlogContent).HasColumnType("text");
             entity.Property(e => e.CategoryFkid).HasColumnName("CategoryFKID");
+            entity.Property(e => e.ImageUrl)
+                .IsUnicode(false)
+                .HasColumnName("ImageURL");
             entity.Property(e => e.Slug)
                 .HasMaxLength(50)
                 .IsUnicode(false)
@@ -118,7 +121,6 @@ public partial class BlogPageContext : DbContext
 
             entity.HasOne(d => d.CategoryFk).WithMany(p => p.BlogPosts)
                 .HasForeignKey(d => d.CategoryFkid)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_BlogPosts_BlogCategories");
         });
 

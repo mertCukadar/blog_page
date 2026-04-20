@@ -3,72 +3,97 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Panel - @ViewData["Title"]</title>
+    <title>@ViewData["Title"] - Yönetim Paneli</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
     <style>
-        .sidebar { min-height: 100vh; width: 250px; transition: all 0.3s; }
-        #sidebar.active { margin-left: -250px; }
+        body { background-color: #f4f7f6; font-family: 'Inter', sans-serif; }
+
+        /* Sidebar Sabit ve Her Zaman Açık */
+        .sidebar { 
+            width: 260px; height: 100vh; position: fixed; 
+            left: 0; top: 0; background: #fff; border-right: 1px solid #e9ecef;
+            display: flex; flex-direction: column; z-index: 1000;
+        }
+
+        /* Logo ve Profil Alanı (Üst Bölüm - Farklı Renk Tonu) */
+        .brand-section {
+            background-color: #fafafa; /* Burayı bir tık farklı yaptık */
+            padding: 25px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+
+        /* İçerik Alanı (Sidebar genişliği kadar soldan boşluk) */
+        .main-content { margin-left: 260px; min-height: 100vh; }
+
+        /* Menü Linkleri */
+        .nav-link { 
+            color: #555; border-radius: 10px; padding: 12px 15px; margin: 5px 15px;
+            font-size: 0.9rem; font-weight: 500; transition: all 0.2s;
+        }
+        .nav-link:hover { background-color: #f8f9fa; color: #000; }
+        .nav-link.active { background-color: #000; color: #fff; }
+        
+        .nav-link i { margin-right: 12px; font-size: 1.1rem; }
+
+        .nav-heading {
+            font-size: 11px; letter-spacing: 1.2px; color: #bbb;
+            margin: 20px 30px 10px; text-transform: uppercase; font-weight: 700;
+        }
     </style>
 </head>
-<body class="bg-light">
-    <div class="d-flex">
-        <nav id="sidebar" class="bg-white shadow-sm p-3 sidebar">
-            <div class="d-flex align-items-center justify-content-between mb-4">
-                <span class="fw-bold fs-5">Kontrol Paneli</span>
-                <button type="button" id="sidebarCollapse" class="btn btn-sm btn-light border d-md-none">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-            </div>
+<body>
+
+    <nav class="sidebar">
+        <div class="brand-section">
+          
             
-            <div class="text-center mb-4">
-                <img src="https://ui-avatars.com/api/?name=@User.Identity.Name" class="rounded-circle mb-2" width="60">
-                <p class="mb-0 fw-semibold small">@User.Identity.Name</p>
-                <span class="badge @(User.IsInRole("Admin") ? "bg-danger" : "bg-warning text-dark") small">
-                    @(User.IsInRole("Admin") ? "ADMIN" : "MODERATÖR")
-                </span>
+            <div class="p-2 border rounded-4 bg-white shadow-sm mt-3">
+                <div class="d-flex align-items-center">
+                    <img src="https://ui-avatars.com/api/?name=@User.Identity.Name&background=000&color=fff" 
+                         class="rounded-circle me-2" width="35">
+                    <div class="text-start overflow-hidden">
+                        <p class="mb-0 fw-bold small text-truncate" style="max-width: 120px;">@User.Identity.Name</p>
+                        <span class="text-success fw-bold" style="font-size: 9px;">● ONLINE</span>
+                    </div>
+                </div>
             </div>
+        </div>
 
-            <ul class="nav flex-column gap-2">
-                <li class="nav-item">
-                    <a class="nav-link text-dark rounded bg-light p-2" href="#"><i class="bi bi-speedometer2 me-2"></i>Genel Bakış</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-dark p-2" href="#"><i class="bi bi-people me-2"></i>Kullanıcılar</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-dark p-2" href="#"><i class="bi bi-check-circle me-2"></i>Blog Onayları</a>
-                </li>
-            </ul>
+        <p class="nav-heading">Navigasyon</p>
+        <ul class="nav flex-column mb-auto">
+            <li><a class="nav-link active" href="/ControlPanel"><i class="bi bi-house-door"></i> Dashboard</a></li>
+            <li><a class="nav-link" href="/ControlPanel/PendingBlogs"><i class="bi bi-patch-check"></i> Onaylar</a></li>
+            <li><a class="nav-link" href="/ControlPanel/Users"><i class="bi bi-people"></i> Kullanıcılar</a></li>
+            <li><a class="nav-link" href="/ControlPanel/Categories"><i class="bi bi-folder"></i> Kategoriler</a></li>
+        </ul>
 
-            <div class="mt-auto pt-5">
-                <a href="/" class="btn btn-outline-info w-100 btn-sm"><i class="bi bi-eye me-2"></i>Guest Modu</a>
+        <div class="p-4 border-top">
+            <a href="/" class="btn btn-light w-100 rounded-pill btn-sm border text-muted fw-bold">
+                <i class="bi bi-arrow-left"></i> Siteye Dön
+            </a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <nav class="navbar navbar-light p-4">
+            <div class="container-fluid">
+                <span class="navbar-text fw-bold text-muted small">
+                    Yönetim Paneli / @ViewData["Title"]
+                </span>
+                <div class="ms-auto bg-white p-2 px-3 rounded-pill shadow-sm border small text-muted">
+                    @DateTime.Now.ToShortDateString() <i class="bi bi-calendar3 ms-2"></i>
+                </div>
             </div>
         </nav>
 
-        <div class="w-100">
-            <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom p-3">
-                <button type="button" id="sidebarBtn" class="btn btn-primary me-3">
-                    <i class="bi bi-list"></i>
-                </button>
-                <span class="navbar-text">Hoş Geldin, Mert Kaan</span>
-            </nav>
-
-            <div class="container-fluid p-4">
-                @RenderBody()
-            </div>
+        <div class="container-fluid px-4 px-md-5">
+            @RenderBody()
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Sidebar Toggle Script
-        document.getElementById('sidebarBtn').addEventListener('click', () => {
-            document.getElementById('sidebar').classList.toggle('active');
-        });
-        document.getElementById('sidebarCollapse')?.addEventListener('click', () => {
-            document.getElementById('sidebar').classList.add('active');
-        });
-    </script>
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

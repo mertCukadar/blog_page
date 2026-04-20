@@ -1,0 +1,76 @@
+﻿@model IEnumerable<blog_page.Models.BlogCategory>
+
+<style>
+    .cat-card { border-radius: 20px; transition: all 0.2s; border: 1px solid #eee !important; }
+    .cat-item { transition: all 0.2s; border-radius: 12px; }
+    .cat-item:hover { background-color: #f8f9fa; }
+    .input-custom { border-radius: 12px; border: 1px solid #eee; padding: 12px; background: #fafafa; }
+    .input-custom:focus { border-color: #000; background: #fff; box-shadow: none; outline: none; }
+</style>
+
+<div class="container-fluid py-4">
+    <div class="mb-5 px-2">
+        <h2 class="fw-bold m-0" style="letter-spacing: -1px;">Kategori Yönetimi</h2>
+        <p class="text-muted small">İçerikleri sınıflandırmak için kategorileri buradan yönetin.</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card cat-card border-0 shadow-sm p-4 bg-white">
+                <h6 class="fw-bold mb-4">Yeni Kategori Oluştur</h6>
+                <form asp-action="CreateCategory" method="post">
+                    <div class="mb-3">
+                        <label class="small fw-bold text-muted mb-2">KATEGORİ ADI</label>
+                        <input type="text" name="categoryName" class="input-custom w-100" placeholder="Örn: Embedded Systems" required>
+                    </div>
+                    <button type="submit" class="btn btn-dark w-100 rounded-pill py-2 fw-bold shadow-sm">
+                        <i class="bi bi-plus-lg me-2"></i>Ekle
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card cat-card border-0 shadow-sm p-4 bg-white">
+                <h6 class="fw-bold mb-4">Mevcut Kategoriler (@Model.Count())</h6>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="bg-light small">
+                            <tr>
+                                <th class="border-0 ps-3">AD</th>
+                                <th class="border-0 text-center">İŞLEMLER</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var cat in Model)
+                            {
+                                <tr class="cat-item">
+                                    <td class="ps-3 fw-semibold text-dark">
+                                        <i class="bi bi-tag me-2 text-muted"></i> @cat.Name
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            @* Düzenleme ileride eklenebilir, şimdilik silme *@
+                                            <form asp-action="DeleteCategory" asp-route-id="@cat.CategoryId" method="post" 
+                                                  onsubmit="return confirm('@cat.Name kategorisini silmek istediğine emin misin Mert?')">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle p-2" style="width: 35px; height: 35px;">
+                                                    <i class="bi bi-trash3"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                @if (!Model.Any())
+                {
+                    <div class="text-center py-4">
+                        <p class="text-muted small m-0">Henüz kategori eklenmemiş.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

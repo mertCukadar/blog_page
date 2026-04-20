@@ -1,0 +1,87 @@
+﻿@model IEnumerable<blog_page.Models.User>
+
+<style>
+    .user-row { transition: all 0.2s; border: 1px solid #eee !important; margin-bottom: 10px; border-radius: 16px; }
+    .user-row:hover { border-color: #000 !important; background-color: #fff !important; box-shadow: 0 5px 15px rgba(0,0,0,0.02); }
+    .search-input { border-radius: 12px; border: 1px solid #eee; padding: 12px 20px; background: #fff; transition: all 0.2s; }
+    .search-input:focus { border-color: #000; box-shadow: none; outline: none; }
+    .ban-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
+</style>
+
+<div class="container-fluid py-4">
+    <div class="row align-items-center mb-5 px-2">
+        <div class="col-md-6">
+            <h2 class="fw-bold m-0" style="letter-spacing: -1px;">Topluluk Yönetimi</h2>
+            <p class="text-muted small mb-0">Platformdaki tüm kayıtlı kullanıcıları yönetin.</p>
+        </div>
+        <div class="col-md-6 mt-3 mt-md-0">
+            <form method="get" asp-action="Users" class="position-relative">
+                <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="search-input w-100" placeholder="Kullanıcı adı veya e-posta ile ara...">
+                <button type="submit" class="btn position-absolute end-0 top-50 translate-middle-y me-2 border-0">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="px-2">
+        @if (Model.Any())
+        {
+            @foreach (var user in Model)
+            {
+                <div class="card user-row bg-white border-0 p-3 shadow-none">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <img src="https://ui-avatars.com/api/?name=@user.Username&background=f8f9fa&color=000" class="rounded-circle border" width="45">
+                        </div>
+                        <div class="col">
+                            <h6 class="fw-bold m-0">@user.Username</h6>
+                            <small class="text-muted">@user.Email</small>
+                        </div>
+                        <div class="col-md-2 d-none d-md-block text-center border-start border-end">
+                            <small class="text-muted d-block" style="font-size: 10px;">KATILIM</small>
+                            <span class="small fw-semibold">@user.CreatedAt.ToString("MMM yyyy")</span>
+                        </div>
+                        <div class="col-md-2 d-none d-md-block px-3">
+                            <div class="d-flex gap-1 flex-wrap">
+                                @foreach (var role in user.UserRoles)
+                                {
+                                    <span class="badge bg-light text-dark border rounded-pill" style="font-size: 10px;">@role.RoleFk.Name</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-auto text-end">
+                            <div class="d-flex gap-2">
+                                @if (user.IsBanned)
+                                {
+                                    <form asp-action="UnbanUser" asp-route-id="@user.Id" method="post">
+                                        <button type="submit" class="btn btn-outline-success ban-btn" title="Kısıtlamayı Kaldır">
+                                            <i class="bi bi-person-check"></i>
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-action="BanUser" asp-route-id="@user.Id" method="post">
+                                        <button type="submit" class="btn btn-outline-danger ban-btn" title="Kullanıcıyı Yasakla">
+                                            <i class="bi bi-person-x"></i>
+                                        </button>
+                                    </form>
+                                }
+                                <a href="#" class="btn btn-light border ban-btn text-muted"><i class="bi bi-three-dots-vertical"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-center py-5 bg-white rounded-4 border">
+                <i class="bi bi-person-dash display-4 text-muted opacity-25"></i>
+                <p class="mt-3 text-muted">Aradığınız kriterlere uygun kullanıcı bulunamadı.</p>
+                <a href="/ControlPanel/Users" class="btn btn-dark btn-sm rounded-pill px-4">Tümünü Göster</a>
+            </div>
+        }
+    </div>
+</div>

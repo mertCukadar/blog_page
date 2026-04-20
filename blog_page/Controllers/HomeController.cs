@@ -1,45 +1,83 @@
 using blog_page.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using System.Security.Claims;
 
 namespace blog_page.Controllers
 {
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        private readonly BlogPageContext _context;
+
+        public HomeController(BlogPageContext blogPageContext)
         {
-            return View();
+            _context = blogPageContext;
         }
 
 
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public async Task<IActionResult> Index(string slug)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+            // 1. Sorguyu hazırlıyoruz (Henüz veritabanına gitmedi)
+            var blogQuery = _context.BlogPosts
+                .Include(b => b.AuthorFkuser)
+                .Include(b => b.CategoryFk)
+                .Where(b => b.Status == true)
+                .AsQueryable();
 
-
-        List<Models.User> vars = new List<Models.User>();
-
-        public IActionResult listUser() {
-
-        for(int i = 0; i < 10; i++)
+            // 2. Eğer URL'den bir slug gelmişse (Kategoriye tıklandıysa) filtreyi ekle
+            if (!string.IsNullOrEmpty(slug))
             {
-                var veri = new Models.User()
-                {
-                    Id = 1,
-                    Email = "cukadar.mertkaan@gmail.com",
-                    CreatedAt = DateTime.Now,
-                    Username = "mertkaan",
-                };
-
-                vars.Add(veri);
+                blogQuery = blogQuery.Where(b => b.CategoryFk.Slug == slug);
             }
-           
 
+            // 3. Veriyi tek seferde ve doğru şekilde çekiyoruz
+            var blogs = await blogQuery
+                .OrderByDescending(b => b.PublishedAt)
+                .ToListAsync();
 
-            return View("Kullanicilar" , vars);
+            return View(blogs);
+        }
+
+        [HttpGet]
+        [Route("Details/{slug}")]
+        public async Task<IActionResult> Details(string slug)
+        {
+            if (string.IsNullOrEmpty(slug)) return NotFound();
+
+            // 1. Önce yazıyı status bağımsız çekelim
+            var post = await _context.BlogPosts
+                .Include(b => b.AuthorFkuser)
+                .Include(b => b.CategoryFk)
+                .FirstOrDefaultAsync(b => b.Slug == slug);
+
+            if (post == null) return NotFound();
+
+            // 2. Kritik Kontrol: Eğer yazı yayında değilse (false)
+            if (post.Status == false)
+            {
+                // Kullanıcı giriş yapmış mı ve Admin/Mod/Yazar mı?
+                bool canView = User.Identity.IsAuthenticated &&
+                               (User.IsInRole("Admin") ||
+                                User.IsInRole("Mod") ||
+                                post.AuthorFkuserId == int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
+
+                if (!canView)
+                {
+                    // Yetkisi yoksa 404 ver (yazı yokmuş gibi davranmak güvenlidir)
+                    return NotFound();
+                }
+            }
+
+            // İzlenme sayısını artıralım (Admin saymasın istiyorsan buraya da check koyabilirsin)
+            if (post.Status == true)
+            {
+                post.ViewCount += 1;
+                await _context.SaveChangesAsync();
+            }
+
+            return View(post);
         }
     }
 }

@@ -17,50 +17,32 @@ namespace blog_page.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin , Mod")]
+        [Route("Category/{slug}")]
+        public IActionResult CategoryFilter(string slug)
+        {
+            // Listeyi burada çekme, sadece Index'e "şu slug'ı filtrele" de.
+            return RedirectToAction("Index", "Home", new { slug = slug });
+        }
         public IActionResult Index()
         {
             var CategoryList = _context.BlogCategories.OrderBy(c => c.Name).ToList();
             return View(CategoryList);
         }
 
-        [HttpPost]
-        [Authorize(Roles = "Admin, Mod")] 
-        [ValidateAntiForgeryToken] 
-        public async Task<IActionResult> Create(string categoryName)
-        {
-            if (string.IsNullOrWhiteSpace(categoryName))
-            {
-                TempData["Error"] = "Kategori adı boş olamaz!";
-                return RedirectToAction("Index");
-            }
+        
+        public async Task<IActionResult> Index(string slug) { 
+            var category_blog = await _context.BlogPosts
+                .Include(b => b.AuthorFkuser)
+                .Include(b => b.CategoryFk)
+                .Where(b => b.CategoryFk.Slug == slug && b.Status == true)
+                .OrderByDescending(b => b.PublishedAt)
+                .ToListAsync();
 
-            bool exists = await _context.BlogCategories.AnyAsync(c => c.Name.ToLower() == categoryName.ToLower());
-            if (exists)
-            {
-                TempData["Error"] = "Bu kategori zaten mevcut!";
-                return RedirectToAction("Index");
-            }
+            return RedirectToAction("Index", "Home", category_blog);
 
-            var newCategory = new BlogCategory
-            {
-                Name = categoryName.Trim(), // Başındaki sonundaki boşlukları temizleyelim
-                Slug = SlugHalpers.toUrlSlug(categoryName),
-                CreatedAt = DateTime.Now
-            };
-
-            _context.BlogCategories.Add(newCategory);
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] = "Kategori başarıyla eklendi.";
-            return RedirectToAction("Index");
         }
+       
 
-        [HttpGet]
-        [Authorize(Roles = "Admin , Mod")]
-        public IActionResult Create() {
-            return View();
-        }
 
 
 

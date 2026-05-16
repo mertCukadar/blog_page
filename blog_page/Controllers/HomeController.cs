@@ -89,5 +89,30 @@ namespace blog_page.Controllers
 
             return View(userBlogs);
         }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteBlog(int id)
+        {
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            var blogToDelete = await _context.BlogPosts
+                .FirstOrDefaultAsync(b => b.PostId == id && b.AuthorFkuserId == currentUserId);
+
+            if (blogToDelete == null)
+            {
+                return NotFound();
+            }
+
+          
+            _context.BlogPosts.Remove(blogToDelete);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Döküman başarıyla silindi.";
+
+            return RedirectToAction("MyBlogs", "Home");
+        }
+
     }
 }

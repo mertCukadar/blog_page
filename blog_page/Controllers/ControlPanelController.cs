@@ -16,7 +16,7 @@ namespace blog_page.Controllers
         }
 
         [Authorize(Roles = "Admin , Mod")]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             var viewModel = new ControlPanelViewModel()
             {
@@ -32,6 +32,8 @@ namespace blog_page.Controllers
                     .OrderByDescending(p => p.CreatedAt)
                     .ToList()
             };
+
+            ViewBag.AllRoles = await _context.Roles.ToListAsync();
 
             return View(viewModel);
         }
@@ -76,7 +78,9 @@ namespace blog_page.Controllers
             }
 
             var users = await usersQuery.OrderByDescending(u => u.CreatedAt).ToListAsync();
-            ViewBag.SearchTerm = searchTerm; // Arama kutusunda yazı kalsın diye
+            ViewBag.SearchTerm = searchTerm;
+            ViewBag.AllRoles = await _context.Roles.ToListAsync();
+
             return View(users);
         }
 
@@ -159,6 +163,32 @@ namespace blog_page.Controllers
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Categories));
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")] // Güvenlik: Sadece Adminler yetki dağıtabilir
+        public async Task<IActionResult> UpdateUserRoles(int userId, List<int> selectedRoles)
+        {
+            var currentRoles = await _context.UserRoles.Where(ur => ur.UserFkid == userId).ToListAsync();
+
+            _context.UserRoles.RemoveRange(currentRoles);
+
+            // Eğer formdan yeni roller seçilmişse, onları ekle
+            if (selectedRoles != null && selectedRoles.Any())
+            {
+                foreach (var roleId in selectedRoles)
+                {
+                    _context.UserRoles.Add(new UserRole
+                    {
+                        UserFkid = userId,
+                        RoleFkid = roleId
+                    });
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Kullanıcı yetkileri güncellendi.";
+            return RedirectToAction("Users");
         }
 
     }

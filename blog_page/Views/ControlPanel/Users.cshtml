@@ -68,8 +68,63 @@
                                         </button>
                                     </form>
                                 }
-                                <a href="#" class="btn btn-light border ban-btn text-muted"><i class="bi bi-three-dots-vertical"></i></a>
+                                
+                                <button type="button" class="btn btn-dark border ban-btn" data-bs-toggle="modal" data-bs-target="#roleModal-@user.Id" title="Yetkileri Yönet">
+                                    <i class="bi bi-shield-lock"></i>
+                                </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="roleModal-@user.Id" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-sm">
+                        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+                            <div class="modal-header border-0 pb-0">
+                                <h6 class="modal-title fw-bold">Yetki Yönetimi</h6>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form asp-action="UpdateUserRoles" method="post">
+                                <div class="modal-body py-4">
+                                    <div class="text-center mb-4">
+                                        <img src="https://ui-avatars.com/api/?name=@user.Username&background=f8f9fa&color=000" class="rounded-circle mb-2 border" width="60">
+                                        <p class="m-0 fw-bold fs-5">@user.Username</p>
+                                        <small class="text-muted">Kullanıcı rollerini güncelleyin</small>
+                                    </div>
+
+                                    <input type="hidden" name="userId" value="@user.Id" />
+
+                                    <div class="d-flex flex-column gap-3 px-3">
+                                        @if (ViewBag.AllRoles != null)
+                                            {
+                                                @foreach (var role in ViewBag.AllRoles)
+                                                {
+                                                
+                                                 var hasRole = user.UserRoles.Any(ur => ur.RoleFkid == role.RoleId);
+                                                
+
+                                                <div class="form-check custom-control d-flex align-items-center mb-2">
+                                                    <input class="form-check-input border-secondary shadow-none" 
+                                                           style="width: 1.2rem; height: 1.2rem; cursor: pointer;" 
+                                                           type="checkbox" 
+                                                           name="selectedRoles" 
+                                                           value="@role.RoleId" 
+                                                           id="role_@(user.Id)_@(role.RoleId)" 
+                                                           checked="@hasRole">
+           
+                                                    <label class="form-check-label ms-2 fw-semibold w-100" for="role_@(user.Id)_@(role.RoleId)" style="cursor: pointer; padding-top: 2px;">
+                                                        @role.Name
+                                                    </label>
+                                                </div>
+                                                                                                }
+                                            }
+                                    </div>
+                                </div>
+                                <div class="modal-footer border-0 pt-0 justify-content-center pb-4 gap-2">
+                                    <button type="button" class="btn btn-light rounded-pill px-4 fw-semibold" data-bs-dismiss="modal">İptal</button>
+                                    <button type="submit" class="btn btn-dark rounded-pill px-4 fw-bold shadow-sm">Kaydet</button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
